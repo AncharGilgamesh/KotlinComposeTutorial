@@ -25,6 +25,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.background
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.first_unit.ui.theme.First_UnitTheme
@@ -38,7 +41,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
                 ) {innerPadding ->
-                    TaskCompletedScreen(modifier = Modifier.padding(innerPadding))
+                    ComposeQuadrantApp(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -46,24 +49,62 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun TaskCompletedScreen(modifier: Modifier = Modifier) {
+fun ComposeQuadrantApp(modifier: Modifier = Modifier) {
+    Column(Modifier.fillMaxWidth()) {
+        Row(Modifier.weight(1f)) {
+            ComposableInfoCard(
+                title = "First title",
+                description = "First description",
+                backgroundColor = Color(0xFFEADDFF),
+                modifier = Modifier.weight(1f)
+            )
+            ComposableInfoCard(
+                title = "second title",
+                description = "second description",
+                backgroundColor = Color(0xFFD0BCFF),
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(Modifier.weight(1f)) {
+            ComposableInfoCard(
+                title = "third title",
+                description = "third description",
+                backgroundColor = Color(0xFFB69DF8),
+                modifier = Modifier.weight(1f)
+            )
+            ComposableInfoCard(
+                title = "fourth title",
+                description = "fourth description",
+                backgroundColor = Color(0xFFF6EDFF),
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ComposableInfoCard(
+    title: String,
+    description: String,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(),
+        modifier = modifier
+            .fillMaxSize()
+            .background(backgroundColor)
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val image = painterResource(R.drawable.ic_task_completed)
-        Image(painter = image, contentDescription = null)
         Text(
-            text = "All tasks completed",
-            modifier = Modifier.padding(top = 24.dp, bottom = 8.dp),
+            text = title,
+            modifier = Modifier.padding(bottom = 16.dp),
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Nice work",
-            fontSize = 16.sp
+            text = description,
+            textAlign = TextAlign.Justify
         )
     }
 }
@@ -73,6 +114,6 @@ fun TaskCompletedScreen(modifier: Modifier = Modifier) {
 fun GreetingPreview() {
     First_UnitTheme {
         //GreetingText(message = "Happy Birthday Sam!", from = "From Emma")
-        TaskCompletedScreen()
+        ComposeQuadrantApp()
     }
 }
