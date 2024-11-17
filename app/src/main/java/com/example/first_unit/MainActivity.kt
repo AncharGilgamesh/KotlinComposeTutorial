@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
@@ -23,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.first_unit.ui.theme.First_UnitTheme
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 
 class MainActivity : ComponentActivity() {
@@ -37,7 +39,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     //containerColor  = Color(0xFF073042)
                 ) {innerPadding ->
-                    DiceWithButtonAndImage(modifier = Modifier.padding(innerPadding))
+                    LemonadeApp(
+                        modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -45,35 +48,63 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
-    var result by remember { mutableStateOf(1) }
-    val imageResource = when (result) {
-        1 -> R.drawable.dice_1
-        2 -> R.drawable.dice_2
-        3 -> R.drawable.dice_3
-        4 -> R.drawable.dice_4
-        5 -> R.drawable.dice_5
-        else -> R.drawable.dice_6
+fun LemonadeApp(modifier: Modifier = Modifier) {
+    var currentIndex by remember { mutableStateOf(1) }
+    var squeezeTapCount by remember { mutableStateOf(2) }
+
+    val stepText = when (currentIndex) {
+        1 -> R.string.step1_text
+        2 -> R.string.step2_text
+        3 -> R.string.step3_text
+        4 -> R.string.step4_text
+        else -> R.string.step1_text
+    }
+    val imageResource = when (currentIndex) {
+        1 -> R.drawable.lemon_tree
+        2 -> R.drawable.lemon_squeeze
+        3 -> R.drawable.lemon_drink
+        4 -> R.drawable.lemon_restart
+        else -> R.drawable.lemon_tree
     }
 
     Column(
         modifier = modifier
             .fillMaxSize() // Заполнение всего доступного пространства
-            .padding(16.dp), // Добавление отступов
-        horizontalAlignment = Alignment.CenterHorizontally, // Центрирование по горизонтали
-        verticalArrangement = Arrangement.Center // Центрирование по вертикали
+            .wrapContentSize(Alignment.Center), // Выравнивание содержимого по центру экрана
+        horizontalAlignment = Alignment.CenterHorizontally // Центрирование по горизонтали внутри Column
     ) {
         Image(
-            painter = painterResource(imageResource),
-            contentDescription = result.toString(),
-            modifier = Modifier.size(150.dp) // Размер изображения
+            painter = painterResource(id = imageResource),
+            modifier = Modifier
+                .size(150.dp) // Установите размер изображения
+                .clickable {
+                    when (currentIndex) {
+                        1 -> {
+                            squeezeTapCount = (1..6).random()
+                            currentIndex += 1
+                        }
+
+                        2 -> {
+                            if (squeezeTapCount == 0) {
+                                currentIndex += 1
+                            } else {
+                                squeezeTapCount--
+                            }
+                        }
+
+                        3 -> {
+                            currentIndex += 1
+                        }
+
+                        4 -> {
+                            currentIndex = 1
+                        }
+                    }
+                },
+            contentDescription = "Lemonade"
         )
-        Spacer(modifier = Modifier.height(16.dp)) // Промежуток между изображением и кнопкой
-        Button(
-            onClick = { result = (1..6).random() },
-        ) {
-            Text(text = stringResource(R.string.roll), fontSize = 24.sp)
-        }
+        Spacer(modifier = Modifier.height(16.dp)) // Промежуток между изображением и текстом
+        Text(text = stringResource(id = stepText))
     }
 }
 
@@ -81,6 +112,8 @@ fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     First_UnitTheme {
-        DiceWithButtonAndImage()
+        LemonadeApp(
+            modifier = Modifier.fillMaxSize().
+            wrapContentSize(Alignment.Center))
     }
 }
