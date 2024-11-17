@@ -5,48 +5,39 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Email
-import androidx.compose.material.icons.rounded.Phone
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Green
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
+import androidx.compose.runtime.getValue
+
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.first_unit.ui.theme.First_UnitTheme
 
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             First_UnitTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    containerColor  = Color(0xFF073042)
+                    //containerColor  = Color(0xFF073042)
                 ) {innerPadding ->
-                    BusinessCard(modifier = Modifier.padding(innerPadding))
+                    DiceWithButtonAndImage(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -54,61 +45,42 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun BusinessCard(modifier: Modifier=Modifier) {
+fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
+    var result by remember { mutableStateOf(1) }
+    val imageResource = when (result) {
+        1 -> R.drawable.dice_1
+        2 -> R.drawable.dice_2
+        3 -> R.drawable.dice_3
+        4 -> R.drawable.dice_4
+        5 -> R.drawable.dice_5
+        else -> R.drawable.dice_6
+    }
+
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .background(Color(0xFF073042)),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+            .fillMaxSize() // Заполнение всего доступного пространства
+            .padding(16.dp), // Добавление отступов
+        horizontalAlignment = Alignment.CenterHorizontally, // Центрирование по горизонтали
+        verticalArrangement = Arrangement.Center // Центрирование по вертикали
     ) {
-        val image = painterResource(R.drawable.android_logo)
         Image(
-            painter = image, contentDescription = null, Modifier.fillMaxWidth(0.3f)
+            painter = painterResource(imageResource),
+            contentDescription = result.toString(),
+            modifier = Modifier.size(150.dp) // Размер изображения
         )
-        Text(text = "Ilnaz Gilmanov", fontSize = 50.sp, color = Color.White)
-        Text(text = "professional lazy dude", fontSize = 25.sp, color = Green)
-        Spacer(modifier = Modifier.padding(bottom = 200.dp))
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = Color(0xFF4F6C79))
-        ContactRow(
-            text = "+ 8 800 555 35 35",
-            icon = Icons.Rounded.Phone
-        )
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = Color(0xFF4F6C79))
-        ContactRow(
-            text = "@ohmygodnoway", icon = Icons.Rounded.Share
-        )
-        HorizontalDivider(modifier = Modifier.fillMaxWidth(), color = Color(0xFF4F6C79))
-        ContactRow(
-            text = "thatsnottrue@gmail.com", icon = Icons.Rounded.Email
-        )
+        Spacer(modifier = Modifier.height(16.dp)) // Промежуток между изображением и кнопкой
+        Button(
+            onClick = { result = (1..6).random() },
+        ) {
+            Text(text = stringResource(R.string.roll), fontSize = 24.sp)
+        }
     }
 }
 
-@Composable
-fun ContactRow(
-    text: String, icon: ImageVector, textBlur: Dp = 0.dp
-) {
-    Row(
-        horizontalArrangement = Arrangement.Center, modifier = Modifier.padding(16.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Green,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = text, color = Color.White, modifier = Modifier
-                .weight(3f)
-                .blur(textBlur)
-        )
-    }
-}
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     First_UnitTheme {
-        //GreetingText(message = "Happy Birthday Sam!", from = "From Emma")
-        BusinessCard()
+        DiceWithButtonAndImage()
     }
 }
