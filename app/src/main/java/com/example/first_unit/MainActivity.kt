@@ -1,5 +1,6 @@
 package com.example.first_unit
 
+import androidx.compose.foundation.Image
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.TextField
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +34,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.res.painterResource
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 
 class MainActivity : ComponentActivity() {
@@ -46,7 +51,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     //containerColor  = Color(0xFF073042)
                 ) {innerPadding ->
-                    TipTimeLayout(
+                    ArtSpaceApp(
                         modifier = Modifier.padding(innerPadding))
                 }
             }
@@ -64,121 +69,58 @@ class MainActivity : ComponentActivity() {
 //    }
 //}
 @Composable
-fun TipTimeLayout(modifier: Modifier = Modifier) {
-    var amountInput by remember { mutableStateOf("") }
-    var tipInput by remember { mutableStateOf("") }
-    var roundUp by remember { mutableStateOf(false) }
-
-    val amount = amountInput.toDoubleOrNull() ?: 0.0
-    val tipPercent = tipInput.toDoubleOrNull() ?: 0.0
-    val tip = calculateTip(amount, tipPercent, roundUp)
-
+fun ArtSpaceApp(modifier: Modifier = Modifier){
+    var currentArtwork by remember{ mutableStateOf(0)}
+    val artworks = listOf(
+        Artwork(R.drawable.art11, "Рай и ад", "Маэстро дель Авиценна", "1435"),
+        Artwork(R.drawable.art2, "Ктулху", "Бенитто Дель Торро", "2004"),
+        Artwork(R.drawable.art3, "Херувим", "Иоахим Втевал", "1578")
+    )
     Column(
-        modifier = Modifier
-            .statusBarsPadding()
-            .padding(horizontal = 40.dp)
-            .verticalScroll(rememberScrollState())
-            .safeDrawingPadding(),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = stringResource(R.string.calculate_tip),
+    ){
+        Image(
+            painter = painterResource(id=artworks[currentArtwork].imageRes),
+            contentDescription = artworks[currentArtwork].title,
             modifier = Modifier
-                .padding(bottom = 16.dp, top = 40.dp)
-                .align(alignment = Alignment.Start)
-        )
-        EditNumberField(
-            label = R.string.bill_amount,
-            leadingIcon = R.drawable.money,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next
-            ),
-            value = amountInput,
-            onValueChanged = { amountInput = it },
-            modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth(),
-        )
-        EditNumberField(
-            label = R.string.how_was_the_service,
-            leadingIcon = R.drawable.percent,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            ),
-            value = tipInput,
-            onValueChanged = { tipInput = it },
-            modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth(),
-        )
-        RoundTheTipRow(
-            roundUp = roundUp,
-            onRoundUpChanged = { roundUp = it },
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-        Text(
-            text = stringResource(R.string.tip_amount, tip),
-            style = MaterialTheme.typography.displaySmall
-        )
-        Spacer(modifier = Modifier.height(150.dp))
-    }
-}
+                .fillMaxSize()
+                .weight(1f)
 
-@Composable
-fun EditNumberField(
-    @StringRes label: Int,
-    @DrawableRes leadingIcon: Int,
-    keyboardOptions: KeyboardOptions,
-    value: String,
-    onValueChanged: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        value = value,
-        singleLine = true,
-        leadingIcon = { Icon(painter = painterResource(id = leadingIcon), null) },
-        modifier = modifier,
-        onValueChange = onValueChanged,
-        label = { Text(stringResource(label)) },
-        keyboardOptions = keyboardOptions
-    )
-}
+        )
 
-@Composable
-fun RoundTheTipRow(
-    roundUp: Boolean,
-    onRoundUpChanged: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = stringResource(R.string.round_up_tip))
-        Switch(
+        Text(text = artworks[currentArtwork].title, fontSize = 24.sp, fontWeight = FontWeight.Normal)
+        Text(text = artworks[currentArtwork].artist, fontSize = 18.sp, fontStyle = FontStyle.Italic)
+        Text(text = artworks[currentArtwork].year, fontSize = 16.sp)
+        Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.End),
-            checked = roundUp,
-            onCheckedChange = onRoundUpChanged
-        )
+                .padding(top = 16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            Button(onClick={
+                if(currentArtwork > 0) currentArtwork--
+            }){
+                Text("Previous")
+            }
+            Button(onClick={
+                if(currentArtwork < artworks.size - 1) currentArtwork++
+            }){
+                Text("Next")
+            }
+        }
     }
 }
 
-
-@VisibleForTesting
-internal fun calculateTip(amount: Double, tipPercent: Double = 15.0, roundUp: Boolean): String {
-    var tip = tipPercent / 100 * amount
-    if (roundUp) {
-        tip = kotlin.math.ceil(tip)
-    }
-    return NumberFormat.getCurrencyInstance().format(tip)
-}
-
+data class Artwork(val imageRes: Int, val title: String, val artist: String, val year: String)
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     First_UnitTheme {
-        TipTimeLayout(
+        ArtSpaceApp(
             modifier = Modifier.fillMaxSize().
             wrapContentSize(Alignment.Center))
     }
