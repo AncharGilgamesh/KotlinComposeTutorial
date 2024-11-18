@@ -4,10 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
+import androidx.compose.material3.TextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,14 +14,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.getValue
-
+import java.text.NumberFormat
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import com.example.first_unit.ui.theme.First_UnitTheme
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
@@ -39,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     //containerColor  = Color(0xFF073042)
                 ) {innerPadding ->
-                    LemonadeApp(
+                    TipTimeLayout(
                         modifier = Modifier.padding(innerPadding))
                 }
             }
@@ -47,72 +48,81 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+//@Composable
+//fun CockSuck(modifier: Modifier = Modifier) {
+//    Column(
+//        modifier = Modifier
+//            .background(Color.Red)
+//    ){
+//        Text(text="a")
+//    }
+//}
 @Composable
-fun LemonadeApp(modifier: Modifier = Modifier) {
-    var currentIndex by remember { mutableStateOf(1) }
-    var squeezeTapCount by remember { mutableStateOf(2) }
+fun TipTimeLayout(modifier: Modifier = Modifier) {
+    var amountInput by remember { mutableStateOf("") }
 
-    val stepText = when (currentIndex) {
-        1 -> R.string.step1_text
-        2 -> R.string.step2_text
-        3 -> R.string.step3_text
-        4 -> R.string.step4_text
-        else -> R.string.step1_text
-    }
-    val imageResource = when (currentIndex) {
-        1 -> R.drawable.lemon_tree
-        2 -> R.drawable.lemon_squeeze
-        3 -> R.drawable.lemon_drink
-        4 -> R.drawable.lemon_restart
-        else -> R.drawable.lemon_tree
-    }
+    val amount = amountInput.toDoubleOrNull() ?: 0.0
+    val tip = calculateTip(amount)
 
     Column(
-        modifier = modifier
-            .fillMaxSize() // Заполнение всего доступного пространства
-            .wrapContentSize(Alignment.Center), // Выравнивание содержимого по центру экрана
-        horizontalAlignment = Alignment.CenterHorizontally // Центрирование по горизонтали внутри Column
+        modifier = Modifier
+            .statusBarsPadding()
+            .padding(horizontal = 40.dp)
+            .verticalScroll(rememberScrollState())
+            .safeDrawingPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            painter = painterResource(id = imageResource),
+        Text(
+            text = stringResource(R.string.calculate_tip),
             modifier = Modifier
-                .size(150.dp) // Установите размер изображения
-                .clickable {
-                    when (currentIndex) {
-                        1 -> {
-                            squeezeTapCount = (1..6).random()
-                            currentIndex += 1
-                        }
-
-                        2 -> {
-                            if (squeezeTapCount == 0) {
-                                currentIndex += 1
-                            } else {
-                                squeezeTapCount--
-                            }
-                        }
-
-                        3 -> {
-                            currentIndex += 1
-                        }
-
-                        4 -> {
-                            currentIndex = 1
-                        }
-                    }
-                },
-            contentDescription = "Lemonade"
+                .padding(bottom = 16.dp, top = 40.dp)
+                .align(alignment = Alignment.Start)
         )
-        Spacer(modifier = Modifier.height(16.dp)) // Промежуток между изображением и текстом
-        Text(text = stringResource(id = stepText))
+        EditNumberField(
+            value = amountInput,
+            onValueChanged = { amountInput = it },
+            modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth()
+        )
+        Text(
+            text = stringResource(R.string.tip_amount, tip),
+            style = MaterialTheme.typography.displaySmall
+        )
+        Spacer(modifier = Modifier.height(150.dp))
     }
+}
+
+@Composable
+fun EditNumberField(
+    value: String,
+    onValueChanged: (String) -> Unit,
+    modifier: Modifier
+) {
+    TextField(
+        value = value,
+        singleLine = true,
+        modifier = modifier,
+        onValueChange = onValueChanged,
+        label = { Text(stringResource(R.string.bill_amount)) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+    )
+}
+
+/**
+ * Calculates the tip based on the user input and format the tip amount
+ * according to the local currency.
+ * Example would be "$10.00".
+ */
+private fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
+    val tip = tipPercent / 100 * amount
+    return NumberFormat.getCurrencyInstance().format(tip)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     First_UnitTheme {
-        LemonadeApp(
+        TipTimeLayout(
             modifier = Modifier.fillMaxSize().
             wrapContentSize(Alignment.Center))
     }
